@@ -10,7 +10,7 @@ Projekt dotyczący inteligentnych budynków, służący do określania optymalny
 ## Zdjęcie poglądowe
 
 <p align="center">
-  <img src="https://github.com/Kuwashitamidayo/projekt_PMV/tree/master/pictures/screenshot_001.png">
+  <img src="https://raw.githubusercontent.com/Kuwashitamidayo/projekt_PMV/master/pictures/screenshot_001.png">
 </p>
 
 ## Wykorzystane biblioteki

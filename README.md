@@ -7,6 +7,12 @@ Projekt dotyczący inteligentnych budynków, służący do określania optymalny
 - implementacja na Raspberry Pi
 - możliwość wyboru współczynnika ubioru i metabolizmu na bazie gotowców z rozwijanej listy, lub ich ręczne wpisywanie
 
+## Zdjęcie poglądowe
+
+<p align="center">
+  <img src="https://github.com/Kuwashitamidayo/projekt_PMV/tree/master/pictures/screenshot_001.png">
+</p>
+
 ## Wykorzystane biblioteki
 - PyQT5 (sudo apt-get install python-pyqt5)
 - PySide (sudo apt-get install python-pyside) - póki co nieużywana

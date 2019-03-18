@@ -21,7 +21,6 @@ class App(QDialog):
     # współczynnik ubioru
     clothingLevel = 0.5
 
-
     ## wyniki
     # PMV - współczynnik komfortu (PMV = (0.303 e^(-0.036metabolicRate^ + 0.028) clothigLevel  )
     pmv = 0
@@ -29,7 +28,6 @@ class App(QDialog):
     ppd = 0
     # kategoria komfortu
     category = ""
-
  
     def __init__(self):
         super().__init__()
@@ -53,7 +51,64 @@ class App(QDialog):
         self.setLayout(windowLayout)
     
         self.show()
-    #def setValues(self):
+    
+    # Liczenie wyników (PMV, PPD, kategoria)
+    def calculateParams(self):
+        self.calculatePMV()
+        self.calculatePPD()
+        self.calculateCategory()
+
+	
+	# Zapis wartości z pól tekstowych do zmiennych
+    def setAirTemperature(self):
+        try:
+            self.airTemperature = float(self.qAirTemperature.text())
+        except:
+            self.airTemperature = 0.0
+            #self.getValues()
+        self.calculateParams()
+
+    def setRadTemperature(self):
+        try:
+            self.radTemperature = float(self.qRadTemperature.text())
+        except:
+            self.radTemperature = 0.0
+            #self.getValues()
+        self.calculateParams()
+
+    def setAirSpeed(self):
+        try:
+            self.airSpeed = float(self.qAirSpeed.text())
+        except:
+            self.airSpeed = 0.0
+            #self.getValues()
+        self.calculateParams()
+
+    def setHumidity(self):
+        try:
+            self.humidity = int(self.qHumidity.text())
+        except:
+            self.humidity = 0
+            #self.getValues()
+        self.calculateParams()
+
+    def setMetabolicRate(self):
+        self.metabolicRate = float(self.qMetabolicRate.text())
+        self.calculateParams()
+
+    def setClothingLevel(self):
+        self.clothingLevel = float(self.qClothingLevel.text())
+        self.calculateParams()
+        
+	
+	# Zapis wartości ze zmiennych do pól tekstowych - może się przyda
+    def getValues(self):
+        self.qAirTemperature.setText(str(self.airTemperature))
+        self.qRadTemperature.setText(str(self.radTemperature))
+        self.qAirSpeed.setText(str(self.airSpeed))
+        self.qHumidity.setText(str(self.humidity))
+        self.qMetabolicRate.setText(str(self.metabolicRate))
+        self.qClothingLevel.setText(str(self.clothingLevel))
 
     # Określanie kategorii na podstawie wartości PMV
     def calculateCategory(self):
@@ -68,14 +123,17 @@ class App(QDialog):
 
     # Tutaj będzie liczone PMV
     def calculatePMV(self):
-        self.pmv = 0    # tu wstawić wzór
-        a = "" + str(self.pmv)
-        return a
+        pmv = 0    # tu wstawić wzór
+        self.pmv = pmv
+        res = str(pmv)
+        return res
 
     # Tutaj będzie liczone PPD
     def calculatePPD(self):
-        self.ppd = 0    # tu wstawić wzór
-        return self.ppd
+        ppd = 0    # tu wstawić wzór
+        self.ppd = ppd
+        res = str(ppd)
+        return res
     
     def createGridLayout(self):
         self.horizontalGroupBox = QGroupBox("Parametry")
@@ -91,87 +149,114 @@ class App(QDialog):
         # Płotek (#) w setInputMask oznacza + lub - przed liczbą
         # QLineEdit - pole do wpisywania wartości
         # QComboBox - rozwijana lista - do zaimplementowania
-        qAirTemperature = QLineEdit()
-        qAirTemperature.setAlignment(Qt.AlignCenter)
-        qAirTemperature.setInputMask('#99.99')  
+        self.qAirTemperature = QLineEdit()
+        self.qAirTemperature.setAlignment(Qt.AlignCenter)
+        qValTemperature = QDoubleValidator(0, 100.0, 2)
+        qValTemperature.setNotation(QDoubleValidator.StandardNotation)
+        self.qAirTemperature.setValidator(qValTemperature)
 
-        qRadTemperature = QLineEdit()
-        qRadTemperature.setAlignment(Qt.AlignCenter)
-        qRadTemperature.setInputMask('#99.99')
+        self.qRadTemperature = QLineEdit()
+        self.qRadTemperature.setAlignment(Qt.AlignCenter)
+        self.qRadTemperature.setValidator(qValTemperature)
 
-        qAirSpeed = QLineEdit()
-        qAirSpeed.setAlignment(Qt.AlignCenter)
-        qAirSpeed.setInputMask('#99.99')
+        self.qAirSpeed = QLineEdit()
+        self.qAirSpeed.setAlignment(Qt.AlignCenter)
+        qValAirSpeed = QDoubleValidator(0.0, 10.0, 2, self)
+        qValAirSpeed.setNotation(QDoubleValidator.StandardNotation)
+        self.qAirSpeed.setValidator(qValAirSpeed)
 
-        qHumidity = QLineEdit()
-        qHumidity.setAlignment(Qt.AlignCenter)
-        qHumidity.setValidator(QIntValidator(0, 100, self))
+        self.qHumidity = QLineEdit()
+        self.qHumidity.setAlignment(Qt.AlignCenter)
+        self.qHumidity.setValidator(QIntValidator(0, 100, self))
 
-        qMetabolicRate = QLineEdit()
-        qMetabolicRate.setAlignment(Qt.AlignCenter)
-        qMetabolicRate.setInputMask("99.9")
+        self.qMetabolicRate = QLineEdit()
+        self.qMetabolicRate.setAlignment(Qt.AlignCenter)
+        qValMetabolicRate = QDoubleValidator(0.0, 30.0, 2)
+        qValMetabolicRate.setNotation(QDoubleValidator.StandardNotation)
+        self.qMetabolicRate.setValidator(qValMetabolicRate)
         
-        qClothingLevel = QLineEdit()
-        qClothingLevel.setAlignment(Qt.AlignCenter)
-        qClothingLevel.setInputMask("99.9")
+        self.qClothingLevel = QLineEdit()
+        self.qClothingLevel.setAlignment(Qt.AlignCenter)
+        qValClothingLevel = QDoubleValidator(0.0, 30.0, 2)
+        qValClothingLevel.setNotation(QDoubleValidator.StandardNotation)
+        self.qClothingLevel.setValidator(qValClothingLevel)
 
-        qPMV = QLabel(str(self.pmv))
-        qPMV.setAlignment(Qt.AlignCenter)
-        qPPD = QLabel(str(self.ppd))
-        qPPD.setAlignment(Qt.AlignCenter)
-        qCategory = QLabel(self.calculateCategory())
-        qCategory.setAlignment(Qt.AlignCenter)
+        self.qPMV = QLabel(str(self.pmv))
+        self.qPMV.setAlignment(Qt.AlignCenter)
+        self.qPPD = QLabel(str(self.ppd))
+        self.qPPD.setAlignment(Qt.AlignCenter)
+        self.qCategory = QLabel(self.calculateCategory())
+        self.qCategory.setAlignment(Qt.AlignCenter)
         
         ## Dodawaie pól do siatki
         # Dla parametrów
         layout.addWidget(QLabel("Temperatura powietrza"),0,0)
-        layout.addWidget(qAirTemperature,0,1)
+        layout.addWidget(self.qAirTemperature,0,1)
         layout.addWidget(QLabel("[°C]"),0,2)
 
         layout.addWidget(QLabel("Średnia temperatura radiacji"),1,0)
-        layout.addWidget(qRadTemperature,1,1)
+        layout.addWidget(self.qRadTemperature,1,1)
         layout.addWidget(QLabel("[°C]"),1,2)
 
         layout.addWidget(QLabel("Prędkość powietrza"),2,0)
-        layout.addWidget(qAirSpeed,2,1)
+        layout.addWidget(self.qAirSpeed,2,1)
         layout.addWidget(QLabel("[m/s]"),2,2)
 
         layout.addWidget(QLabel("Wilgotność"),3,0)
-        layout.addWidget(qHumidity,3,1)
+        layout.addWidget(self.qHumidity,3,1)
         layout.addWidget(QLabel("[%]"),3,2)
 
         layout.addWidget(QLabel("Współcznynnik metabolizmu"),4,0)
-        layout.addWidget(qMetabolicRate,4,1)
+        layout.addWidget(self.qMetabolicRate,4,1)
         layout.addWidget(QLabel("[met]"),4,2)
         
         layout.addWidget(QLabel("Współcznynnik ubioru"),5,0)
-        layout.addWidget(qClothingLevel,5,1)
+        layout.addWidget(self.qClothingLevel,5,1)
         layout.addWidget(QLabel("[clo]"),5,2)
 
         # Dla wyników
         layoutRes.addWidget(QLabel("PMV (wskażnik komfortu)"),0,0)
-        layoutRes.addWidget(qPMV,0,1)
+        layoutRes.addWidget(self.qPMV,0,1)
 
         layoutRes.addWidget(QLabel("PPD (odsetek niezadowolonych)"),1,0)
-        layoutRes.addWidget(qPPD,1,1)
+        layoutRes.addWidget(self.qPPD,1,1)
         layoutRes.addWidget(QLabel("[%]"),1,2)
 
 
         layoutRes.addWidget(QLabel("Kategoria"),2,0)
-        layoutRes.addWidget(qCategory, 2,1)
+        layoutRes.addWidget(self.qCategory, 2,1)
 
         ## Inicjowanie wartości w polach
-        qAirTemperature.setText(str(self.airTemperature))
-        qRadTemperature.setText(str(self.radTemperature))
-        qAirSpeed.setText(str(self.airSpeed))
-        qHumidity.setText(str(self.humidity))
-        qMetabolicRate.setText(str(self.metabolicRate))
-        qClothingLevel.setText(str(self.clothingLevel))
+        self.qAirTemperature.setText(str(self.airTemperature))
+        self.qRadTemperature.setText(str(self.radTemperature))
+        self.qAirSpeed.setText(str(self.airSpeed))
+        self.qHumidity.setText(str(self.humidity))
+        self.qMetabolicRate.setText(str(self.metabolicRate))
+        self.qClothingLevel.setText(str(self.clothingLevel))
+		
+		## Łączenie zmiennych przechowujących wartości z polami tekstowymi
+        self.qAirTemperature.textChanged.connect(self.setAirTemperature)#str(self.airTemperature))
+        self.qAirTemperature.editingFinished.connect(self.getValues)
+
+        self.qRadTemperature.textChanged.connect(self.setRadTemperature)
+        self.qRadTemperature.editingFinished.connect(self.getValues)
+
+        self.qAirSpeed.textChanged.connect(self.setAirSpeed)
+        self.qAirSpeed.editingFinished.connect(self.getValues)
+
+        self.qHumidity.textChanged.connect(self.setHumidity)
+        self.qHumidity.editingFinished.connect(self.getValues)
+
+        self.qMetabolicRate.textChanged.connect(self.setMetabolicRate)
+        self.qMetabolicRate.editingFinished.connect(self.getValues)
+
+        self.qClothingLevel.textChanged.connect(self.setClothingLevel)
+        self.qClothingLevel.editingFinished.connect(self.getValues)
 
         
         self.horizontalGroupBox.setLayout(layout)
         self.horizontalGroupBoxResults.setLayout(layoutRes)
-    
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 ex = App()

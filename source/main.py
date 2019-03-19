@@ -59,49 +59,50 @@ class App(QDialog):
         self.calculateCategory()
 
 	
-	# Zapis wartości z pól tekstowych do zmiennych
+    # Ustawia temperaturę powietrza
     def setAirTemperature(self):
         try:
-            self.airTemperature = float(self.qAirTemperature.text())
+            self.airTemperature = float(self.qAirTemperature.text().replace(",", "."))
         except:
             self.airTemperature = 0.0
-            #self.getValues()
         self.calculateParams()
-
+    
+    # Ustawia temperaturę radiacji (np. grzanie ścian, szyb)
     def setRadTemperature(self):
         try:
-            self.radTemperature = float(self.qRadTemperature.text())
+            self.radTemperature = float(self.qRadTemperature.text().replace(",", "."))
         except:
             self.radTemperature = 0.0
-            #self.getValues()
         self.calculateParams()
 
+    # Ustawia prędkość powietrza
     def setAirSpeed(self):
         try:
-            self.airSpeed = float(self.qAirSpeed.text())
+            self.airSpeed = float(self.qAirSpeed.text().replace(",", "."))
         except:
             self.airSpeed = 0.0
-            #self.getValues()
         self.calculateParams()
 
+    # Ustawia wilgotność
     def setHumidity(self):
         try:
             self.humidity = int(self.qHumidity.text())
         except:
             self.humidity = 0
-            #self.getValues()
         self.calculateParams()
 
+    # Ustawia współczynnik metabolizmu
     def setMetabolicRate(self):
-        self.metabolicRate = float(self.qMetabolicRate.text())
+        self.metabolicRate = float(self.qMetabolicRate.text().replace(",", "."))
         self.calculateParams()
 
+    # Ustawia współczynnik ubioru
     def setClothingLevel(self):
-        self.clothingLevel = float(self.qClothingLevel.text())
+        self.clothingLevel = float(self.qClothingLevel.text().replace(",", "."))
         self.calculateParams()
         
 	
-	# Zapis wartości ze zmiennych do pól tekstowych - może się przyda
+    # Zapis wartości ze zmiennych do pól tekstowych - może się przyda
     def getValues(self):
         self.qAirTemperature.setText(str(self.airTemperature))
         self.qRadTemperature.setText(str(self.radTemperature))
@@ -149,10 +150,13 @@ class App(QDialog):
         # Płotek (#) w setInputMask oznacza + lub - przed liczbą
         # QLineEdit - pole do wpisywania wartości
         # QComboBox - rozwijana lista - do zaimplementowania
+        locale = QLocale("Polish")
+        
         self.qAirTemperature = QLineEdit()
         self.qAirTemperature.setAlignment(Qt.AlignCenter)
         qValTemperature = QDoubleValidator(0, 100.0, 2)
         qValTemperature.setNotation(QDoubleValidator.StandardNotation)
+        qValTemperature.setLocale(locale)
         self.qAirTemperature.setValidator(qValTemperature)
 
         self.qRadTemperature = QLineEdit()
@@ -163,6 +167,7 @@ class App(QDialog):
         self.qAirSpeed.setAlignment(Qt.AlignCenter)
         qValAirSpeed = QDoubleValidator(0.0, 10.0, 2, self)
         qValAirSpeed.setNotation(QDoubleValidator.StandardNotation)
+        qValAirSpeed.setLocale(locale)
         self.qAirSpeed.setValidator(qValAirSpeed)
 
         self.qHumidity = QLineEdit()
@@ -173,12 +178,14 @@ class App(QDialog):
         self.qMetabolicRate.setAlignment(Qt.AlignCenter)
         qValMetabolicRate = QDoubleValidator(0.0, 30.0, 2)
         qValMetabolicRate.setNotation(QDoubleValidator.StandardNotation)
+        qValMetabolicRate.setLocale(locale)
         self.qMetabolicRate.setValidator(qValMetabolicRate)
         
         self.qClothingLevel = QLineEdit()
         self.qClothingLevel.setAlignment(Qt.AlignCenter)
         qValClothingLevel = QDoubleValidator(0.0, 30.0, 2)
         qValClothingLevel.setNotation(QDoubleValidator.StandardNotation)
+        qValClothingLevel.setLocale(locale)
         self.qClothingLevel.setValidator(qValClothingLevel)
 
         self.qPMV = QLabel(str(self.pmv))
@@ -234,7 +241,7 @@ class App(QDialog):
         self.qMetabolicRate.setText(str(self.metabolicRate))
         self.qClothingLevel.setText(str(self.clothingLevel))
 		
-		## Łączenie zmiennych przechowujących wartości z polami tekstowymi
+        ## Łączenie zmiennych przechowujących wartości z polami tekstowymi
         self.qAirTemperature.textChanged.connect(self.setAirTemperature)#str(self.airTemperature))
         self.qAirTemperature.editingFinished.connect(self.getValues)
 

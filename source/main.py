@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 import numpy as np
+import math as mth
 # https://tutorials-raspberrypi.com/raspberry-pi-measure-humidity-temperature-dht11-dht22/
 # import Adaruit_DHT
 
@@ -41,9 +42,9 @@ class App(QDialog):
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
-    
+
         self.createGridLayout()
-        
+
         windowLayout = QVBoxLayout()
         windowLayout.addWidget(self.horizontalGroupBox)
         windowLayout.addWidget(self.horizontalGroupBoxResults)
@@ -57,6 +58,9 @@ class App(QDialog):
         self.calculatePMV()
         self.calculatePPD()
         self.calculateCategory()
+        self.qPMV.setText(str(self.pmv))
+        self.qPPD.setText(str(self.ppd))
+        self.qCategory.setText(self.category)
 
 	
     # Ustawia temperaturę powietrza
@@ -124,7 +128,8 @@ class App(QDialog):
 
     # Tutaj będzie liczone PMV
     def calculatePMV(self):
-        pmv = 0    # tu wstawić wzór
+        a = 0.303*mth.exp(-0.036*self.metabolicRate)+0.028
+        pmv = a    # tu wstawić wzór
         self.pmv = pmv
         res = str(pmv)
         return res

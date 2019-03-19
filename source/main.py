@@ -5,7 +5,7 @@ from PyQt5.QtGui import *
 import numpy as np
 import math as mth
 # https://tutorials-raspberrypi.com/raspberry-pi-measure-humidity-temperature-dht11-dht22/
-# import Adaruit_DHT
+#import Adaruit_DHT
 
  
 class App(QDialog):

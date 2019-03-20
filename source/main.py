@@ -21,6 +21,10 @@ class App(QDialog):
     metabolicRate = 1.0
     # współczynnik ubioru
     clothingLevel = 0.5
+    # praca zewnętrzna
+    extWork = 10
+    #ciśnienie cząsteczkowe pary wodnej
+    steamPressure = 1000 #[Pa], 1 hPa na biegunach, 20-30 hPa na równiku
 
     ## wyniki
     # PMV - współczynnik komfortu (PMV = (0.303 e^(-0.036metabolicRate^ + 0.028) clothigLevel  )
@@ -104,6 +108,17 @@ class App(QDialog):
     def setClothingLevel(self):
         self.clothingLevel = float(self.qClothingLevel.text().replace(",", "."))
         self.calculateParams()
+
+    # Ustawia pracę zewnetrzna
+    def setExtWork(self):
+        self.extWork = int(self.qExtWork.text())
+        self.calculateParams()
+
+    # Ustawia ciśnienie cząsteczkowe pary wodnej
+    def setSteamPressure(self):
+        self.steamPressure = int(self.qSteamPressure.text())
+        self.calculateParams()
+
         
 	
     # Zapis wartości ze zmiennych do pól tekstowych - może się przyda
@@ -114,6 +129,8 @@ class App(QDialog):
         self.qHumidity.setText(str(self.humidity))
         self.qMetabolicRate.setText(str(self.metabolicRate))
         self.qClothingLevel.setText(str(self.clothingLevel))
+        self.qExtWork.setText(str(self.extWork))
+        self.qSteamPressure.setText(str(self.steamPressure))
 
     # Określanie kategorii na podstawie wartości PMV
     def calculateCategory(self):
@@ -128,8 +145,9 @@ class App(QDialog):
 
     # Tutaj będzie liczone PMV
     def calculatePMV(self):
-        a = 0.303*mth.exp(-0.036*self.metabolicRate)+0.028
-        pmv = a    # tu wstawić wzór
+        a = 0.303*mth.exp(-0.036*self.metabolicRate*58)+0.028
+        b = (self.metabolicRate*58-self.extWork)-0.00305*(5773-6.99*(self.metabolicRate*58-self.extWork)-self.steamPressure)-0.42*((self.metabolicRate*58-self.extWork)-58.15)
+        pmv = a*(b )    # tu wstawić wzór
         self.pmv = pmv
         res = str(pmv)
         return res
@@ -193,6 +211,14 @@ class App(QDialog):
         qValClothingLevel.setLocale(locale)
         self.qClothingLevel.setValidator(qValClothingLevel)
 
+        self.qExtWork = QLineEdit()
+        self.qExtWork.setAlignment(Qt.AlignCenter)
+        self.qExtWork.setValidator(QIntValidator(0, 500, self))
+
+        self.qSteamPressure = QLineEdit()
+        self.qSteamPressure.setAlignment(Qt.AlignCenter)
+        self.qSteamPressure.setValidator(QIntValidator(1000, 30000, self))
+
         self.qPMV = QLabel(str(self.pmv))
         self.qPMV.setAlignment(Qt.AlignCenter)
         self.qPPD = QLabel(str(self.ppd))
@@ -226,6 +252,14 @@ class App(QDialog):
         layout.addWidget(self.qClothingLevel,5,1)
         layout.addWidget(QLabel("[clo]"),5,2)
 
+        layout.addWidget(QLabel("Praca zewnętrzna"),6,0)
+        layout.addWidget(self.qExtWork,6,1)
+        layout.addWidget(QLabel("[W/m2]"),6,2)
+
+        layout.addWidget(QLabel("Ciśnienie cząsteczkowe pary wodnej"),7,0)
+        layout.addWidget(self.qSteamPressure,7,1)
+        layout.addWidget(QLabel("[Pa]"),7,2)
+
         # Dla wyników
         layoutRes.addWidget(QLabel("PMV (wskażnik komfortu)"),0,0)
         layoutRes.addWidget(self.qPMV,0,1)
@@ -245,6 +279,8 @@ class App(QDialog):
         self.qHumidity.setText(str(self.humidity))
         self.qMetabolicRate.setText(str(self.metabolicRate))
         self.qClothingLevel.setText(str(self.clothingLevel))
+        self.qExtWork.setText(str(self.extWork))
+        self.qSteamPressure.setText(str(self.steamPressure))
 		
         ## Łączenie zmiennych przechowujących wartości z polami tekstowymi
         self.qAirTemperature.textChanged.connect(self.setAirTemperature)#str(self.airTemperature))
@@ -264,6 +300,12 @@ class App(QDialog):
 
         self.qClothingLevel.textChanged.connect(self.setClothingLevel)
         self.qClothingLevel.editingFinished.connect(self.getValues)
+
+        self.qExtWork.textChanged.connect(self.setExtWork)
+        self.qExtWork.editingFinished.connect(self.getValues)
+
+        self.qSteamPressure.textChanged.connect(self.setSteamPressure)
+        self.qSteamPressure.editingFinished.connect(self.getValues)
 
         
         self.horizontalGroupBox.setLayout(layout)

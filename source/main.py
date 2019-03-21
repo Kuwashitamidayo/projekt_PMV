@@ -22,12 +22,14 @@ class App(QDialog):
     # współczynnik ubioru
     clothingLevel = 0.5
     # praca zewnętrzna
-    extWork = 10
+    extWork = 50
     #ciśnienie cząsteczkowe pary wodnej
     steamPressure = 1000 #[Pa], 1 hPa na biegunach, 20-30 hPa na równiku
+    #temperatura powierzchnii odzieży
+    clothingTemperature = 15.0
 
     ## wyniki
-    # PMV - współczynnik komfortu (PMV = (0.303 e^(-0.036metabolicRate^ + 0.028) clothigLevel  )
+    # PMV - współczynnik komfortu (PMV = (0.303 e^(-0.036metabolicRate^ + 0.028) clothingLevel  )
     pmv = 0
     # PPD - odsetek niezadowolonych
     ppd = 0
@@ -119,6 +121,14 @@ class App(QDialog):
         self.steamPressure = int(self.qSteamPressure.text())
         self.calculateParams()
 
+    # Ustawia temperaturę powietrza
+    def setClothingTemperature(self):
+        try:
+            self.clothingTemperature = float(self.qClothingTemperature.text().replace(",", "."))
+        except:
+            self.clothingTemperature = 0.0
+        self.calculateParams()
+
         
 	
     # Zapis wartości ze zmiennych do pól tekstowych - może się przyda
@@ -131,6 +141,7 @@ class App(QDialog):
         self.qClothingLevel.setText(str(self.clothingLevel))
         self.qExtWork.setText(str(self.extWork))
         self.qSteamPressure.setText(str(self.steamPressure))
+        self.qClothingTemperature.setText(str(self.clothingTemperature))
 
     # Określanie kategorii na podstawie wartości PMV
     def calculateCategory(self):
@@ -145,16 +156,28 @@ class App(QDialog):
 
     # Tutaj będzie liczone PMV
     def calculatePMV(self):
+        if self.clothingLevel*0.155 > 0.078:
+            f_cl = 1.05+0.645*self.clothingLevel*0.155
+        else:
+            f_cl = 1+1.29*self.clothingLevel*0.155
+
+        if (2.38*mth.pow(mth.fabs(self.clothingTemperature-self.airTemperature),0.25)) > (12.1*mth.sqrt(self.airSpeed)):
+            h_c = 12.1*mth.sqrt(self.airSpeed)
+        else:
+            h_c = 2.38*mth.pow(mth.fabs(self.clothingTemperature-self.airTemperature),0.25)
+
         a = 0.303*mth.exp(-0.036*self.metabolicRate*58)+0.028
         b = (self.metabolicRate*58-self.extWork)-0.00305*(5773-6.99*(self.metabolicRate*58-self.extWork)-self.steamPressure)-0.42*((self.metabolicRate*58-self.extWork)-58.15)
-        pmv = a*(b )    # tu wstawić wzór
+        c = -1.7*mth.pow(10,-5)*self.metabolicRate*58*(5867-self.steamPressure)-0.0014*self.metabolicRate*58*(34-self.airTemperature)
+        d = -3.96*mth.pow(10,-8)*f_cl*(mth.pow((self.clothingTemperature+273),4)-mth.pow((self.radTemperature+273),4)) - f_cl*h_c*(self.clothingTemperature-self.radTemperature)
+        pmv = a*(b+c+d)    # tu wstawić wzór
         self.pmv = pmv
         res = str(pmv)
         return res
 
     # Tutaj będzie liczone PPD
     def calculatePPD(self):
-        ppd = 0    # tu wstawić wzór
+        ppd = mth.fabs(1-95*mth.exp(-0.03353*mth.pow(self.pmv,4)-0.2179*mth.pow(self.pmv,2)))    # tu wstawić wzór
         self.ppd = ppd
         res = str(ppd)
         return res
@@ -217,7 +240,14 @@ class App(QDialog):
 
         self.qSteamPressure = QLineEdit()
         self.qSteamPressure.setAlignment(Qt.AlignCenter)
-        self.qSteamPressure.setValidator(QIntValidator(1000, 30000, self))
+        self.qSteamPressure.setValidator(QIntValidator(100, 3000, self))
+
+        self.qClothingTemperature = QLineEdit()
+        self.qClothingTemperature.setAlignment(Qt.AlignCenter)
+        qCloTemperature = QDoubleValidator(0, 100.0, 2)
+        qCloTemperature.setNotation(QDoubleValidator.StandardNotation)
+        qCloTemperature.setLocale(locale)
+        self.qClothingTemperature.setValidator(qCloTemperature)
 
         self.qPMV = QLabel(str(self.pmv))
         self.qPMV.setAlignment(Qt.AlignCenter)
@@ -260,6 +290,10 @@ class App(QDialog):
         layout.addWidget(self.qSteamPressure,7,1)
         layout.addWidget(QLabel("[Pa]"),7,2)
 
+        layout.addWidget(QLabel("Temperatura powierzchni odzieży"),8,0)
+        layout.addWidget(self.qClothingTemperature,8,1)
+        layout.addWidget(QLabel("[°C]"),8,2)
+
         # Dla wyników
         layoutRes.addWidget(QLabel("PMV (wskażnik komfortu)"),0,0)
         layoutRes.addWidget(self.qPMV,0,1)
@@ -281,6 +315,7 @@ class App(QDialog):
         self.qClothingLevel.setText(str(self.clothingLevel))
         self.qExtWork.setText(str(self.extWork))
         self.qSteamPressure.setText(str(self.steamPressure))
+        self.qClothingTemperature.setText(str(self.clothingTemperature))
 		
         ## Łączenie zmiennych przechowujących wartości z polami tekstowymi
         self.qAirTemperature.textChanged.connect(self.setAirTemperature)#str(self.airTemperature))
@@ -306,6 +341,9 @@ class App(QDialog):
 
         self.qSteamPressure.textChanged.connect(self.setSteamPressure)
         self.qSteamPressure.editingFinished.connect(self.getValues)
+
+        self.qClothingTemperature.textChanged.connect(self.setClothingTemperature)
+        self.qClothingTemperature.editingFinished.connect(self.getValues)
 
         
         self.horizontalGroupBox.setLayout(layout)

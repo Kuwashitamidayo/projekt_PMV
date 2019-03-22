@@ -7,7 +7,7 @@ import math as mth
 # https://tutorials-raspberrypi.com/raspberry-pi-measure-humidity-temperature-dht11-dht22/
 # import Adaruit_DHT
 
- 
+
 class App(QDialog):
     # temperatura powietrza
     airTemperature = 20.0
@@ -50,6 +50,7 @@ class App(QDialog):
         self.setGeometry(self.left, self.top, self.width, self.height)
 
         self.createGridLayout()
+        self.calculateParams()
 
         windowLayout = QVBoxLayout()
         windowLayout.addWidget(self.horizontalGroupBox)
